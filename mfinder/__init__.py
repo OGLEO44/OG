@@ -24,27 +24,27 @@ if os.path.exists("config.ini"):
 id_pattern = re.compile(r"^.\d+$")
 
 # --- Environment Variables ---
-APP_ID = os.environ.get("APP_ID", "28643132")
-API_HASH = os.environ.get("API_HASH", "510c3009ea589830a89e045bf8aae656")
-BOT_TOKEN = os.environ.get("BOT_TOKEN", "6770553757:AAG1p2K0-qOcpnkp80P5Snf59HF29-_7lTQ")
-DB_URL = os.environ.get("DB_URL", "mongodb+srv://UB:UB@cluster0.bkxgfh4.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
-MONGO_URI = os.environ.get("MONGO_URI", "mongodb+srv://UB:UB@cluster0.bkxgfh4.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
+APP_ID = os.environ.get("APP_ID", "")
+API_HASH = os.environ.get("API_HASH", "")
+BOT_TOKEN = os.environ.get("BOT_TOKEN", "")
+DB_URL = os.environ.get("DB_URL", "")
+MONGO_URI = os.environ.get("MONGO_URI", "")
 DB_NAME = os.environ.get('DB_NAME', "CyberTG")
 
 try:
-    OWNER_ID = int(os.environ.get("OWNER_ID", "5483128891"))
+    OWNER_ID = int(os.environ.get("OWNER_ID", ""))
 except ValueError:
     OWNER_ID = 0
     LOGGER.warning("OWNER_ID environment variable is not a valid integer.")
 
 ADMINS = [
     int(user) if id_pattern.search(user) else user
-    for user in os.environ.get("ADMINS", "5483128891").split()
+    for user in os.environ.get("ADMINS", "").split()
 ] + [OWNER_ID]
 
 DB_CHANNELS = [
     int(ch) if id_pattern.search(ch) else ch
-    for ch in os.environ.get("DB_CHANNELS", "-1001996538290").split()
+    for ch in os.environ.get("DB_CHANNELS", "").split()
 ]
 
 # --- Import constants safely ---
