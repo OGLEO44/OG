@@ -10,7 +10,7 @@ from mfinder.db.settings_sql import get_search_settings, change_search_settings
 from mfinder.utils.constants import STARTMSG, HELPMSG
 from mfinder import LOGGER, ADMINS, START_MSG, HELP_MSG, START_KB, HELP_KB
 from mfinder.utils.util_support import humanbytes, get_db_size
-from mfinder.plugins.serve import get_files
+from mfinder.plugins.serve import get_files # Correct import for get_files
 
 
 @Client.on_message(filters.command(["start"]))
@@ -37,8 +37,10 @@ async def start(bot, update):
         )
         search_settings = await get_search_settings(user_id)
         if not search_settings:
+            # Ensures default search setting is applied if user is new
             await change_search_settings(user_id, link_mode=True)
     elif len(update.command) == 2:
+        # Call get_files function to handle deep-linking for file fetching
         await get_files(bot, update)
 
 
@@ -66,7 +68,7 @@ async def back(bot, query):
         start_msg = START_MSG.format(name, user_id)
     except Exception as e:
         LOGGER.warning(e)
-        start_msg = STARTMSG
+        start_msg = STARTMSG.format(name, user_id) # Use formatted STARTMSG here
     await query.message.edit_text(start_msg, reply_markup=START_KB)
 
 
@@ -84,8 +86,10 @@ async def help_cb(bot, query):
 async def restart(bot, update):
     LOGGER.warning("Restarting bot using /restart command")
     msg = await update.reply_text(text="__Restarting.....__")
-    await asyncio.sleep(5)
+    # Added a slight delay for user feedback
+    await asyncio.sleep(1)
     await msg.edit("__Bot restarted !__")
+    # Using sys.executable is safer
     os.execv(sys.executable, ["python3", "-m", "mfinder"] + sys.argv)
 
 
@@ -102,13 +106,17 @@ async def log_file(bot, update):
 @Client.on_message(filters.command(["server"]) & filters.user(ADMINS))
 async def server_stats(bot, update):
     sts = await update.reply_text("__Calculating, please wait...__")
-    total, used, free = shutil.disk_usage(".")
-    ram = virtual_memory()
+    
+    # Calculate ping more accurately before other operations
     start_t = time.time()
+    await update.reply_text("Ping test...")
     end_t = time.time()
     time_taken_s = (end_t - start_t) * 1000
-
     ping = f"{time_taken_s:.3f} ms"
+    
+    total, used, free = shutil.disk_usage(".")
+    ram = virtual_memory()
+    
     total = humanbytes(total)
     used = humanbytes(used)
     free = humanbytes(free)
