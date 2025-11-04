@@ -30,7 +30,7 @@ from mfinder import LOGGER
 
 
 @Client.on_message(
-    ~filters.regex(r"^\/") & filters.text & (filters.private | filters.group) & filters.incoming
+    ~filters.regex(r"^\/") & filters.text & filters.private & filters.incoming
 )
 async def filter_(bot, message):
     user_id = message.from_user.id
@@ -54,7 +54,7 @@ async def filter_(bot, message):
             await message.reply_text(
                 text="**Please join my Update Channel to use this Bot!**",
                 reply_markup=InlineKeyboardMarkup(
-                    [[InlineKeyboardButton("🚨 Join Channel", url=link)]]
+                    [[InlineKeyboardButton("🤖 Join Channel", url=link)]]
                 ),
                 parse_mode=ParseMode.MARKDOWN,
                 quote=True,
@@ -104,7 +104,7 @@ async def filter_(bot, message):
                 )
         else:
             await message.reply_text(
-                text="No results found.\nOr retry with the correct spelling 🔍",
+                text="No results found.\nOr retry with the correct spelling 🤐",
                 quote=True,
             )
 
@@ -137,7 +137,7 @@ async def pages(bot, query):
             pass
     else:
         await query.message.reply_text(
-            text="No results found.\nOr retry with the correct spelling 🔍",
+            text="No results found.\nOr retry with the correct spelling 🤐",
             quote=True,
         )
 
@@ -245,7 +245,7 @@ async def get_result(search, page_no, user_id, username):
             result = (
                 result
                 + "\n\n"
-                + "💡 __Tap on below corresponding file number to download.__ 💡"
+                + "🔻 __Tap on below corresponding file number to download.__ 🔻"
             )
         elif link_mode == "ON":
             result = result + "\n\n" + " __Tap on file name & then start to download.__"
