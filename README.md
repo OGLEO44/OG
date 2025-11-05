@@ -97,6 +97,8 @@ If you want to modify start & help messages, copy [`sample_const.py`](sample_con
 cp sample_const.py const.py
 ```
 
+koyeb supported ✅
+
 ## Support
 
 Feedback or Support
