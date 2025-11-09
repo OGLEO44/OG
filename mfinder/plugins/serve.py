@@ -1,4 +1,3 @@
-
 #CREDITS TO @CyberTGX
 
 import re
@@ -196,7 +195,7 @@ async def get_result(search, page_no, user_id, username):
                 file_id = file.file_id
                 filename = f"[{get_size(file.file_size)}]{file.file_name}"
                 btn_kb = InlineKeyboardButton(
-                    text=f"{filename}", callback_data=f"file {file_id}"
+                    text=f"{filename}", url=f"https://t.me/{username}?start={file_id}"
                 )
                 btn.append([btn_kb])
             elif link_mode == "ON":
@@ -215,7 +214,7 @@ async def get_result(search, page_no, user_id, username):
                 result += "\n" + filename
 
                 btn_kb = InlineKeyboardButton(
-                    text=f"{index}", callback_data=f"file {file_id}"
+                    text=f"{index}", url=f"https://t.me/{username}?start={file_id}"
                 )
 
                 if btn_count == 1 or btn_count == 6:
@@ -259,16 +258,7 @@ async def get_result(search, page_no, user_id, username):
     return None, None
 
 
-@Client.on_callback_query(filters.regex(r"^file (.+)$"))
-async def get_files(bot, query):
-    user_id = query.from_user.id
-    if isinstance(query, CallbackQuery):
-        file_id = query.data.split()[1]
-        await query.answer("Sending file...", cache_time=60)
-        cbq = True
-    elif isinstance(query, Message):
-        file_id = query.text.split()[1]
-        cbq = False
+async def send_file(bot, chat_id, file_id):
     filedetails = await get_file_details(file_id)
     admin_settings = await get_admin_settings()
     for files in filedetails:
@@ -283,20 +273,12 @@ async def get_files(bot, query):
         if admin_settings.get('caption_uname'):
             f_caption = f_caption + "\n" + admin_settings.get('caption_uname')
 
-        if cbq:
-            msg = await query.message.reply_cached_media(
-                file_id=file_id,
-                caption=f_caption,
-                parse_mode=ParseMode.MARKDOWN,
-                quote=True,
-            )
-        else:
-            msg = await query.reply_cached_media(
-                file_id=file_id,
-                caption=f_caption,
-                parse_mode=ParseMode.MARKDOWN,
-                quote=True,
-            )
+        msg = await bot.send_cached_media(
+            chat_id=chat_id,
+            file_id=file_id,
+            caption=f_caption,
+            parse_mode=ParseMode.MARKDOWN,
+        )
 
         if admin_settings.get('auto_delete'):
             delay_dur = admin_settings.get('auto_delete')
@@ -304,13 +286,23 @@ async def get_files(bot, query):
             delay = round(delay, 2)
             minsec = str(delay) + " mins" if delay_dur > 60 else str(delay) + " secs"
             disc = await bot.send_message(
-                user_id,
+                chat_id,
                 f"Please save the file to your saved messages, it will be deleted in {minsec}",
             )
             await asyncio.sleep(delay_dur)
             await disc.delete()
             await msg.delete()
-            await bot.send_message(user_id, "File has been deleted")
+            await bot.send_message(chat_id, "File has been deleted")
+
+
+@Client.on_message(filters.private & filters.command("start"))
+async def start(bot, message):
+    if len(message.command) > 1:
+        file_id = message.command[1]
+        user_id = message.from_user.id
+        await send_file(bot, user_id, file_id)
+    else:
+        await message.reply_text("Welcome! Send me a search query.")
 
 
 def get_size(size):
