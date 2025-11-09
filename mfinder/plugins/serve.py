@@ -29,6 +29,9 @@ from mfinder.db.ban_sql import is_banned
 from mfinder.db.filters_sql import is_filter
 from mfinder import LOGGER
 
+@Client.on_message(filters.group | filters.private & filters.text & filters.incoming) #GIVE FILTER IN PM BRO IDEA OF GOUTHAM SER
+async def give_filter(bot, message):
+    await filter_(bot, message)
 
 @Client.on_message(
     ~filters.regex(r"^\/") & filters.text & filters.private & filters.incoming
