@@ -8,7 +8,7 @@ async def user_settings(bot, update):
     user_id = update.from_user.id
     set_kb = await find_search_settings(user_id) 
     await bot.send_message(
-        chat_id=user_id,
+        chat_id=update.chat.id,  # Changed to send in the same chat where the command was issued
         text=SET_MSG,
         reply_markup=set_kb,
     )
