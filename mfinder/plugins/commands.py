@@ -10,7 +10,7 @@ from mfinder.db.settings_sql import get_search_settings, change_search_settings
 from mfinder.utils.constants import STARTMSG, HELPMSG
 from mfinder import LOGGER, ADMINS, START_MSG, HELP_MSG, START_KB, HELP_KB
 from mfinder.utils.util_support import humanbytes, get_db_size
-from mfinder.plugins.serve import get_files # Correct import for get_files
+from mfinder.plugins.serve import send_file  # Updated import to send_file for deep-linking
 
 
 @Client.on_message(filters.command(["start"]))
@@ -40,8 +40,10 @@ async def start(bot, update):
             # Ensures default search setting is applied if user is new
             await change_search_settings(user_id, link_mode=True)
     elif len(update.command) == 2:
-        # Call get_files function to handle deep-linking for file fetching
-        await get_files(bot, update)
+        # Handle deep-linking for file fetching by calling send_file directly
+        file_id = update.command[1]
+        user_id = update.from_user.id
+        await send_file(bot, user_id, file_id)
 
 
 @Client.on_message(filters.command(["help"]))
@@ -68,7 +70,7 @@ async def back(bot, query):
         start_msg = START_MSG.format(name, user_id)
     except Exception as e:
         LOGGER.warning(e)
-        start_msg = STARTMSG.format(name, user_id) # Use formatted STARTMSG here
+        start_msg = STARTMSG.format(name, user_id)  # Use formatted STARTMSG here
     await query.message.edit_text(start_msg, reply_markup=START_KB)
 
 
@@ -95,11 +97,11 @@ async def restart(bot, update):
 
 @Client.on_message(filters.command(["logs"]) & filters.user(ADMINS))
 async def log_file(bot, update):
-    logs_msg = await update.reply("__Sending logs, please wait...__")
+    logs_msg = await update.reply_text("__Sending logs, please wait...__")
     try:
         await update.reply_document("logs.txt")
     except Exception as e:
-        await update.reply(str(e))
+        await update.reply_text(str(e))
     await logs_msg.delete()
 
 
