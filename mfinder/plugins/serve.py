@@ -295,6 +295,14 @@ async def send_file(bot, chat_id, file_id):
             await bot.send_message(chat_id, "File has been deleted")
 
 
+@Client.on_callback_query(filters.regex(r"^file (.+)$"))
+async def get_files(bot, query):
+    user_id = query.from_user.id
+    file_id = query.data.split()[1]
+    await query.answer("Sending file...", cache_time=60)
+    await send_file(bot, user_id, file_id)
+
+
 @Client.on_message(filters.private & filters.command("start"))
 async def start(bot, message):
     if len(message.command) > 1:
