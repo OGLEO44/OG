@@ -6,15 +6,18 @@ import shutil
 from psutil import cpu_percent, virtual_memory, disk_usage
 from pyrogram import Client, filters
 from mfinder.db.broadcast_sql import add_user
-from mfinder.db.settings_sql import get_search_settings, change_search_settings
 from mfinder.utils.constants import STARTMSG, HELPMSG
 from mfinder import LOGGER, ADMINS, START_MSG, HELP_MSG, START_KB, HELP_KB
 from mfinder.utils.util_support import humanbytes, get_db_size
 from mfinder.plugins.serve import send_file  # Updated import to send_file for deep-linking
 
-from mfinder import ADMINS  # make sure ADMINS is imported from config
-from mfinder.db.settings_sql import SETTINGS_COLLECTION  # we’ll use this directly
 from pymongo import UpdateMany
+from mfinder.db.settings_sql import (
+    get_search_settings,
+    change_search_settings,
+    SETTINGS_COLLECTION,
+    INSERTION_LOCK
+)
 
 @Client.on_message(filters.command(["start"]))
 async def start(bot, update):
@@ -265,3 +268,4 @@ async def find_search_settings(user_id):
 @Client.on_callback_query(filters.regex(r"^disabled$"))
 async def no_access(bot, query):
     await query.answer("🚫 Only admins can change this setting.", show_alert=True)
+
