@@ -68,30 +68,27 @@ async def find_search_settings(user_id):
         InlineKeyboardButton("[Precise Mode]:", callback_data="prec md"),
     ]
 
-    on_kb = InlineKeyboardButton("❌ Disabled", callback_data="prec on")
-    off_kb = InlineKeyboardButton("✅ Enabled", callback_data="prec off")
+    on_kb = InlineKeyboardButton("✅ Enable", callback_data="prec on")
+    off_kb = InlineKeyboardButton("❌ Disable", callback_data="prec off")
 
     if search_settings:
         precise_mode_value = search_settings.get("precise_mode", False)
         
         if precise_mode_value:
-            precise_mode = "Enabled"
             kb.append(off_kb)
         else:
-            precise_mode = "Disabled"
             kb.append(on_kb)
     else:
         await change_search_settings(user_id)
-        precise_mode = "Disabled"
         kb.append(on_kb)
 
     bkb = [
         InlineKeyboardButton("[Result Mode]:", callback_data="res mode"),
     ]
 
-    btn_kb = InlineKeyboardButton("📃 List", callback_data="res btnn")
-    link_kb = InlineKeyboardButton("🔳 Button", callback_data="res link")
-    list_kb = InlineKeyboardButton("🔗 HyperLink", callback_data="res list")
+    btn_kb = InlineKeyboardButton("🔳 Button", callback_data="res btnn")
+    link_kb = InlineKeyboardButton("🔗 HyperLink", callback_data="res link")
+    list_kb = InlineKeyboardButton("📃 List", callback_data="res list")
 
     if search_settings:
         button_mode = search_settings.get("button_mode", False)
@@ -109,9 +106,8 @@ async def find_search_settings(user_id):
             bkb.append(list_kb)
     else:
         await change_search_settings(user_id, link_mode=True)
-        bkb.append(btn_kb) 
+        bkb.append(list_kb) 
 
     set_kb = InlineKeyboardMarkup([kb, bkb])
 
     return set_kb
-
