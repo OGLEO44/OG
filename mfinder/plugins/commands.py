@@ -268,4 +268,3 @@ async def find_search_settings(user_id):
 @Client.on_callback_query(filters.regex(r"^disabled$"))
 async def no_access(bot, query):
     await query.answer("🚫 Only admins can change this setting.", show_alert=True)
-
