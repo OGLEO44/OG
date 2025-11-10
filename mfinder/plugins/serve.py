@@ -42,7 +42,7 @@ async def filter_(bot, message):
         return
 
     if await is_banned(user_id):
-        await message.reply_text("You are banned. You can't use this bot.", quote=True)
+        await message.reply_text("You are banned. You can't use this bot.")  # Removed quote=True
         return
 
     # Force sub check now handled in send_file for consistency (removed from here to avoid duplication)
@@ -57,8 +57,7 @@ async def filter_(bot, message):
     if fltr:
         await message.reply_text(
             text=fltr.message,
-            quote=True,
-        )
+        )  # Removed quote=True
         return
 
     if 2 < len(message.text) < 100:
@@ -73,15 +72,13 @@ async def filter_(bot, message):
                 f"{result}",
                 reply_markup=InlineKeyboardMarkup(btn),
                 link_preview_options=LinkPreviewOptions(is_disabled=True),
-                quote=True,
-            )
+            )  # Removed quote=True
             # Delete after 10 minutes (600 seconds)
             asyncio.create_task(delete_after(reply, message, 600))
         else:
             reply = await message.reply_text(
                 text="No results found.\nOr retry with the correct spelling 🤐",
-                quote=True,
-            )
+            )  # Removed quote=True
             # Delete after 30 seconds
             asyncio.create_task(delete_after(reply, message, 30))
 
@@ -108,8 +105,7 @@ async def pages(bot, query):
     else:
         await query.message.reply_text(
             text="No results found.\nOr retry with the correct spelling 🤐",
-            quote=True,
-        )
+        )  # Removed quote=True
 
 async def get_result(search, page_no, user_id, username):
     search_settings = await get_search_settings(user_id)
@@ -184,7 +180,7 @@ async def send_file(bot, chat_id, file_id):
         try:
             user = await bot.get_chat_member(int(force_sub), user_id)
             if user.status == ChatMemberStatus.BANNED:
-                await bot.send_message(chat_id, "Sorry, you are Banned to use me.", quote=True)
+                await bot.send_message(chat_id, "Sorry, you are Banned to use me.")  # Removed quote=True
                 return
         except UserNotParticipant:
             link = await get_link()
@@ -195,16 +191,14 @@ async def send_file(bot, chat_id, file_id):
                     [[InlineKeyboardButton("🤖 Join Channel", url=link)]]
                 ),
                 parse_mode=ParseMode.MARKDOWN,
-                quote=True,
-            )
+            )  # Removed quote=True
             return
         except Exception as e:
             LOGGER.warning(f"Force sub check failed for user {user_id}: {e}")
             await bot.send_message(
                 chat_id,
                 text="Something went wrong with subscription check. Please contact support.",
-                quote=True,
-            )
+            )  # Removed quote=True
             return
 
     # Proceed with sending the file only if force sub is satisfied
