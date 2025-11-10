@@ -1,4 +1,4 @@
-#CREDITS TO @CyberTGX
+#CREDITS TO @im_goutham_josh
 
 import re
 import asyncio
@@ -92,25 +92,21 @@ async def filter_(bot, message):
         result, btn = await get_result(search, page_no, user_id, username)
 
         if result:
-            if btn:
-                await message.reply_text(
-                    f"{result}",
-                    reply_markup=InlineKeyboardMarkup(btn),
-                    link_preview_options=LinkPreviewOptions(is_disabled=True),
-                    quote=True,
-                )
-            else:
-                await message.reply_text(
-                    f"{result}",
-                    link_preview_options=LinkPreviewOptions(is_disabled=True),
-                    quote=True,
-                )
+            reply = await message.reply_text(
+                f"{result}",
+                reply_markup=InlineKeyboardMarkup(btn),
+                link_preview_options=LinkPreviewOptions(is_disabled=True),
+                quote=True,
+            )
+            # Delete after 10 minutes (600 seconds)
+            asyncio.create_task(delete_after(reply, message, 600))
         else:
-            await message.reply_text(
+            reply = await message.reply_text(
                 text="No results found.\nOr retry with the correct spelling 🤐",
                 quote=True,
             )
-
+            # Delete after 30 seconds
+            asyncio.create_task(delete_after(reply, message, 30))
 
 @Client.on_callback_query(filters.regex(r"^(nxt_pg|prev_pg) \d+ \d+ .+$"))
 async def pages(bot, query):
@@ -125,17 +121,11 @@ async def pages(bot, query):
 
     if result:
         try:
-            if btn:
-                await query.message.edit(
-                    f"{result}",
-                    reply_markup=InlineKeyboardMarkup(btn),
-                    link_preview_options=LinkPreviewOptions(is_disabled=True),
-                )
-            else:
-                await query.message.edit(
-                    f"{result}",
-                    link_preview_options=LinkPreviewOptions(is_disabled=True),
-                )
+            await query.message.edit(
+                f"{result}",
+                reply_markup=InlineKeyboardMarkup(btn),
+                link_preview_options=LinkPreviewOptions(is_disabled=True),
+            )
         except MessageNotModified:
             pass
     else:
@@ -143,7 +133,6 @@ async def pages(bot, query):
             text="No results found.\nOr retry with the correct spelling 🤐",
             quote=True,
         )
-
 
 async def get_result(search, page_no, user_id, username):
     search_settings = await get_search_settings(user_id)
@@ -159,70 +148,25 @@ async def get_result(search, page_no, user_id, username):
         files, count = await get_filter_results(query=search, page=page_no)
         precise_search = "Disabled"
 
-    if search_settings:
-        if search_settings.get('button_mode'):
-            button_mode = "ON"
-        else:
-            button_mode = "OFF"
-    else:
-        button_mode = "OFF"
-
-    if search_settings:
-        if search_settings.get('link_mode'):
-            link_mode = "ON"
-        else:
-            link_mode = "OFF"
-    else:
-        link_mode = "OFF"
-
-    if button_mode == "ON" and link_mode == "OFF":
-        search_md = "Button"
-    elif button_mode == "OFF" and link_mode == "ON":
-        search_md = "HyperLink"
-    else:
-        search_md = "List Button"
+    # Force button mode only
+    button_mode = "ON"
+    link_mode = "OFF"
+    search_md = "Button"
 
     if files:
         btn = []
         index = (page_no - 1) * 10
         crnt_pg = index // 10 + 1
         tot_pg = (count + 10 - 1) // 10
-        btn_count = 0
         result = f"**Search Query:** `{search}`\n**Total Results:** `{count}`\n**Page:** `{crnt_pg}/{tot_pg}`\n**Precise Search: **`{precise_search}`\n**Result Mode:** `{search_md}`\n"
         page = page_no
         for file in files:
-            if button_mode == "ON":
-                file_id = file.file_id
-                filename = f"[{get_size(file.file_size)}]{file.file_name}"
-                btn_kb = InlineKeyboardButton(
-                    text=f"{filename}", url=f"https://t.me/{username}?start={file_id}"
-                )
-                btn.append([btn_kb])
-            elif link_mode == "ON":
-                index += 1
-                btn_count += 1
-                file_id = file.file_id
-                filename = f"**{index}.** [{file.file_name}](https://t.me/{username}/?start={file_id}) - `[{get_size(file.file_size)}]`"
-                result += "\n" + filename
-            else:
-                index += 1
-                btn_count += 1
-                file_id = file.file_id
-                filename = (
-                    f"**{index}.** `{file.file_name}` - `[{get_size(file.file_size)}]`"
-                )
-                result += "\n" + filename
-
-                btn_kb = InlineKeyboardButton(
-                    text=f"{index}", url=f"https://t.me/{username}?start={file_id}"
-                )
-
-                if btn_count == 1 or btn_count == 6:
-                    btn.append([btn_kb])
-                elif 6 > btn_count > 1:
-                    btn[0].append(btn_kb)
-                else:
-                    btn[1].append(btn_kb)
+            file_id = file.file_id
+            filename = f"[{get_size(file.file_size)}]{file.file_name}"
+            btn_kb = InlineKeyboardButton(
+                text=f"{filename}", url=f"https://t.me/{username}?start={file_id}"
+            )
+            btn.append([btn_kb])
 
         nxt_kb = InlineKeyboardButton(
             text="Next >>",
@@ -244,19 +188,15 @@ async def get_result(search, page_no, user_id, username):
         if kb:
             btn.append(kb)
 
-        if button_mode and link_mode == "OFF":
-            result = (
-                result
-                + "\n\n"
-                + "🔻 __Tap on below corresponding file number to download.__ 🔻"
-            )
-        elif link_mode == "ON":
-            result = result + "\n\n" + " __Tap on file name & then start to download.__"
+        result = (
+            result
+            + "\n\n"
+            + "🔻 __Tap on below corresponding file to download.__ 🔻"
+        )
 
         return result, btn
 
     return None, None
-
 
 async def send_file(bot, chat_id, file_id):
     filedetails = await get_file_details(file_id)
@@ -294,14 +234,12 @@ async def send_file(bot, chat_id, file_id):
             await msg.delete()
             await bot.send_message(chat_id, "File has been deleted")
 
-
 @Client.on_callback_query(filters.regex(r"^file (.+)$"))
 async def get_files(bot, query):
     user_id = query.from_user.id
     file_id = query.data.split()[1]
     await query.answer("Sending file...", cache_time=60)
     await send_file(bot, user_id, file_id)
-
 
 @Client.on_message(filters.private & filters.command("start"))
 async def start(bot, message):
@@ -312,7 +250,6 @@ async def start(bot, message):
     else:
         await message.reply_text("Welcome! Send me a search query.")
 
-
 def get_size(size):
     units = ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB"]
     size = float(size)
@@ -321,3 +258,11 @@ def get_size(size):
         i += 1
         size /= 1024.0
     return f"{size:.2f} {units[i]}"
+
+async def delete_after(bot_msg, user_msg, delay):
+    await asyncio.sleep(delay)
+    try:
+        await bot_msg.delete()
+        await user_msg.delete()
+    except Exception as e:
+        LOGGER.warning(f"Failed to delete messages: {e}")
