@@ -6,7 +6,7 @@ START_KB = InlineKeyboardMarkup(
         [
             InlineKeyboardButton("🆘 Help", callback_data="help_cb"),
             InlineKeyboardButton(
-                "👨‍💻 Source Code", url="https://t.me/+QbWh1eEL0v4wM2Zl"
+                "👨‍💻 Source Code", url="https://t.me/wudixh12"
             ),
         ]
     ]
@@ -21,7 +21,7 @@ HELP_KB = InlineKeyboardMarkup(
 )
 
 
-STARTMSG = "Hi **[{}](tg://user?id={})**, I am a media finder bot which finds media from my database channel. Just send query to find the media.\nSend /help for more or you can toggle your settings by sending /settings."
+STARTMSG = "Hi **[{}](tg://user?id={})**,\nI am a media finder bot which finds media from my database channel. Just send query to find the media.\nSend /help for more or you can toggle your settings by sending /settings."
 
 
 HELPMSG = """
@@ -73,4 +73,5 @@ SET_MSG = """
 
 
 __You can toggle with right side buttons__:-"""
+
 
