@@ -62,6 +62,8 @@ async def index(bot, query):
     await query.message.delete()
     msg = await bot.send_message(user_id, "Processing Index...⏳")
     total_files = 0
+    BATCH_SIZE = 50  # Adjustable batch size for fetching messages
+    
     async with lock:
         try:
             total = last_msg_id + 1
@@ -69,50 +71,53 @@ async def index(bot, query):
             if current >= total:
                 await msg.edit("Skip value is too high, no messages to index.")
                 return
-            counter = 0
-            while True:
+            
+            while current < total:
+                batch_ids = list(range(current, min(current + BATCH_SIZE, total)))
                 try:
-                    message = await bot.get_messages(
-                        chat_id=chat_id, message_ids=current, replies=0
-                    )
+                    messages = await bot.get_messages(chat_id=chat_id, message_ids=batch_ids, replies=0)
                 except FloodWait as e:
-                    LOGGER.warning("FloodWait while indexing, Error: %s", str(e))
+                    LOGGER.warning("FloodWait while batch fetching, sleeping for: %s", e.value)
                     await asyncio.sleep(e.value)
+                    continue  # Retry the batch
                 except Exception as e:
-                    LOGGER.warning("Error occurred while fetching message: %s", str(e))
+                    LOGGER.warning("Error fetching batch: %s", str(e))
+                    current += BATCH_SIZE  # Skip the problematic batch
+                    continue
                 
-                try:
-                    for file_type in ("document", "video", "audio"):
-                        media = getattr(message, file_type, None)
-                        
-                        if media:
-                            file_name = media.file_name
-                            file_name = edit_caption(file_name)
-                            media.file_type = file_type
-                            media.caption = file_name
-                            await save_file(media)
+                # Process the batch: Collect save tasks for concurrency
+                save_tasks = []
+                for message in messages:
+                    if message and any(getattr(message, file_type, None) for file_type in ("document", "video", "audio")):
+                        # Early check: Only process if message has media
+                        for file_type in ("document", "video", "audio"):
+                            media = getattr(message, file_type, None)
+                            if media:
+                                file_name = media.file_name
+                                file_name = edit_caption(file_name)
+                                media.file_type = file_type
+                                media.caption = file_name
+                                save_tasks.append(save_file(media))  # Add to concurrent tasks
+                
+                # Execute saves concurrently
+                if save_tasks:
+                    results = await asyncio.gather(*save_tasks, return_exceptions=True)
+                    for result in results:
+                        if isinstance(result, Exception):
+                            LOGGER.warning("Error in concurrent save: %s", str(result))
+                        else:
                             total_files += 1
-                                                
-                except Exception as e:
-                    LOGGER.warning("Error occurred while saving file: %s", str(e))
-
-                current += 1
-                counter += 1
-                if counter == 50:
+                
+                current += BATCH_SIZE
+                
+                # Update progress less frequently (every 500 files)
+                if total_files % 500 == 0:
                     try:
-                        await msg.edit(
-                            f"Total messages fetched: {current}\nTotal files saved: {total_files}"
-                        )
+                        await msg.edit(f"🔦Total messages fetched: {current}\n✅Total files saved: {total_files}")
                     except FloodWait as e:
-                        LOGGER.warning(
-                            "FloodWait while indexing, sleeping for: %s", str(e.value)
-                        )
+                        LOGGER.warning("FloodWait on progress update, sleeping for: %s", e.value)
                         await asyncio.sleep(e.value)
-                    counter -= 50
-                    
-                if current == total:
-                    break
-
+            
         except Exception as e:
             LOGGER.exception(e)
             await msg.edit(f"Error: {e}")
