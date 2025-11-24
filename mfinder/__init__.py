@@ -24,27 +24,27 @@ if os.path.exists("config.ini"):
 id_pattern = re.compile(r"^.\d+$")
 
 # --- Environment Variables ---
-APP_ID = os.environ.get("APP_ID", "18979569")
-API_HASH = os.environ.get("API_HASH", "45db354387b8122bdf6c1b0beef93743")
-BOT_TOKEN = os.environ.get("BOT_TOKEN", "8356103121:AAH50QqLMfuArwJzNy6Rbc8gWNcwp2QWRNQ")
-DB_URL = os.environ.get("DB_URL", "mongodb+srv://SIMPLEBOT:SIMPLEBOT@simplebot.6swbixn.mongodb.net/?appName=SIMPLEBOT")
-MONGO_URI = os.environ.get("MONGO_URI", "mongodb+srv://SIMPLEBOT:SIMPLEBOT@simplebot.6swbixn.mongodb.net/?appName=SIMPLEBOT")
+APP_ID = os.environ.get("APP_ID", "11824466")
+API_HASH = os.environ.get("API_HASH", "5afd3ea9d0018ed654ae39a87aee62c7")
+BOT_TOKEN = os.environ.get("BOT_TOKEN", "")
+DB_URL = os.environ.get("DB_URL", "mongodb+srv://vj200812:vj200812@cluster0.btt0vy5.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
+MONGO_URI = os.environ.get("MONGO_URI", "mongodb+srv://vj200812:vj200812@cluster0.btt0vy5.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
 DB_NAME = os.environ.get('DB_NAME', "SIMPLEBOT")
 
 try:
-    OWNER_ID = int(os.environ.get("OWNER_ID", "6108995220"))
+    OWNER_ID = int(os.environ.get("OWNER_ID", ""))
 except ValueError:
     OWNER_ID = 0
     LOGGER.warning("OWNER_ID environment variable is not a valid integer.")
 
 ADMINS = [
     int(user) if id_pattern.search(user) else user
-    for user in os.environ.get("ADMINS", "5483128891").split()
+    for user in os.environ.get("ADMINS", "").split()
 ] + [OWNER_ID]
 
 DB_CHANNELS = [
     int(ch) if id_pattern.search(ch) else ch
-    for ch in os.environ.get("DB_CHANNELS", "-1001811670072").split()
+    for ch in os.environ.get("DB_CHANNELS", "").split()
 ]
 
 # --- Import constants safely ---
