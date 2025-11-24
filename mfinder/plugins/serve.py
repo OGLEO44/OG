@@ -233,9 +233,9 @@ async def get_result(search, page_no, user_id, username):
             btn.append([InlineKeyboardButton(text=filename, url=f"https://t.me/{username}?start={file_id}")])
 
         if crnt_pg > 1:
-            btn.append([InlineKeyboardButton("<< Previous", callback_data=f"prev_pg {user_id} {page_no - 1} {search}")])
+            btn.append([InlineKeyboardButton("⬅️ Pʀᴇᴠɪᴏᴜꜱ", callback_data=f"prev_pg {user_id} {page_no - 1} {search}")])
         if crnt_pg < tot_pg:
-            btn.append([InlineKeyboardButton("Next >>", callback_data=f"nxt_pg {user_id} {page_no + 1} {search}")])
+            btn.append([InlineKeyboardButton("Nᴇxᴛ Pᴀɢᴇ ➡️", callback_data=f"nxt_pg {user_id} {page_no + 1} {search}")])
 
         return result, btn
 
