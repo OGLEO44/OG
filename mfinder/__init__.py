@@ -27,8 +27,8 @@ id_pattern = re.compile(r"^.\d+$")
 APP_ID = os.environ.get("APP_ID", "11824466")
 API_HASH = os.environ.get("API_HASH", "5afd3ea9d0018ed654ae39a87aee62c7")
 BOT_TOKEN = os.environ.get("BOT_TOKEN", "")
-DB_URL = os.environ.get("DB_URL", "mongodb+srv://vj200812:vj200812@cluster0.btt0vy5.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
-MONGO_URI = os.environ.get("MONGO_URI", "mongodb+srv://vj200812:vj200812@cluster0.btt0vy5.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
+DB_URL = os.environ.get("DB_URL", "mongodb+srv://autofilterPredvd:autofilterPredvd@cluster0.ljo5dnu.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
+MONGO_URI = os.environ.get("MONGO_URI", "mongodb+srv://autofilterPredvd:autofilterPredvd@cluster0.ljo5dnu.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
 DB_NAME = os.environ.get('DB_NAME', "SIMPLEBOT")
 
 try:
